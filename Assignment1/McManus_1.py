@@ -36,29 +36,5 @@ def MyErrorPlot(x,y,title, yerror, my_ax=None):
     ax.set_title(title)
     ax.set_xlabel('Variable X'); ax.set_ylabel('Variable Y')
     return ax
-    
-
-"""
-# In[16]:
-
-
-xx = np.linspace(0,4*np.pi, 60)
-yy = np.cos(xx)
-title_str='Cosine Function'
-
-MyPlot(xx,yy, title_str)
-
-
-# In[17]:
-
-
-yerror = yy*0.2 # error is 20% of the value
-ax = MyErrorPlot(xx,yy,  title_str+' (with Error Bars)', yerror=yerror)
-ax.grid(axis='y')
-
-
-# In[ ]:
-"""
-
 
 
