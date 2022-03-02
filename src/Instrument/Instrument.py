@@ -1,5 +1,6 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 
 if __name__ == "__main__":
@@ -63,7 +64,11 @@ class Instrument():
             obstype: string {'photon_counts' 'flux'} specifies whether to comupte photon counts or flux
 
         Returns:
-            dict of wavelength (key "lmbda") and photon count or flux (key: "photons" or "flux")
+            dict of simulation results:
+                "lmbda": wavelength bin centers in nanometers
+                "expected": photon counts in bins
+                "error": +/- 1 standard deviation from expected count
+                "simulated": poisson simulated photon counts, mu=expected
         """
 
         if obstype != 'flux' and obstype != 'photon_counts':
@@ -71,6 +76,11 @@ class Instrument():
 
         if obstype != 'photon_counts':
             raise ValueError('Only \'photon_counts\' implemeneted at this time.')
+
+        #save the arguments for later
+        self.target = star
+        self.obstime = obstime
+        self.obstype = obstype
 
         lam_m = self.lam_meters()
         bin_width = self.binwidth_m()
@@ -94,11 +104,39 @@ class Instrument():
         simulated_photon_counts = np.random.poisson(lam=expected_photon_counts,size=self.nlam)
 
         #return result
-        return {'lmbda':self.lam, #note nanometers
+
+        self.simresult = {'lmbda':self.lam, #note nanometers
                 'expected': expected_photon_counts,
                 'error': np.sqrt(expected_photon_counts),
                 'simulated':simulated_photon_counts
                 }
+
+        return self.simresult
+
+    def plotsim(self, **kwargs):
+
+        sim = kwargs.pop('sim', None)
+        obstime = kwargs.pop('obstime', None)
+
+        ax = kwargs.pop('ax', None)
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(12,6))
+
+        sim = sim if sim is not None else self.simresult
+        obstime = obstime if obstime is not None else self.obstime
+        target = self.target
+
+        ax.plot(sim['lmbda'], sim['expected'], label='Expected Photon Count', drawstyle='steps', lw=5)
+        ax.plot(sim['lmbda'], sim['expected']+sim['error'], drawstyle='steps', lw=1, color='black')
+        ax.plot(sim['lmbda'], sim['expected']-sim['error'], drawstyle='steps', lw=1, color='black', label='+/- Error')
+
+        ax.plot(sim['lmbda'], sim['simulated'], ls='None', marker='o', label='Simulated Photon Count')
+
+        ax.legend()
+        ax.set_ylabel('Photons per Wavelength Bin')
+        ax.set_xlabel('Wavelength Bin Center (nm)')
+        ax.set_title(f'Instrument: {self.name}' + f'\nExposure time: {obstime} seconds'+'\nTarget: '+str(target))
+
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

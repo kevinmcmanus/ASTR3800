@@ -42,6 +42,10 @@ class Star():
                 str += f', {prop}: {v}'            
         return str
 
+    def __str__(self):
+        s = self.name+f', Dist: {self.distance} pc, Temp: {self.teff} K, Radius: {self.radius} R_sun, Mass: {self.mass} M_sun'
+        return s
+
     def radius_m(self):
         """
         Returns star radius in m.
